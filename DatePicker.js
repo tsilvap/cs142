@@ -55,7 +55,8 @@ DatePicker.prototype.render = function render(date) {
     var day = date.getDate(),
         month = date.getMonth(),
         calendarBody,
-        tableRow;
+        daysHtml = '',
+        i;
 
     this.renderTable(this.monthName(month));
 
@@ -66,21 +67,16 @@ DatePicker.prototype.render = function render(date) {
         date.setDate(1 - date.getDay());
     }
 
-    calendarBody = document.querySelector('#' + this.id + ' tbody');
-    calendarBody.appendChild(document.createElement('tr'));
-
-    tableRow = document.querySelector('#' + this.id + ' tbody tr');
-
     // Fill calendar body with days
+    calendarBody = document.querySelector('#' + this.id + ' tbody');
     while (date.getMonth() % 12 !== (month + 1) % 12) {
-        calendarBody.appendChild(document.createElement('tr'));
-        tableRow = calendarBody.lastChild;
-        for (var i = 0; i < 7; i++) {
-            var elem = document.createElement('td');
-            var currDate = date.getDate();
-            elem.textContent = currDate;
-            tableRow.appendChild(elem);
-            date.setDate(currDate + 1);
+        daysHtml += '<tr>';
+        for (i = 0; i < 7; i += 1) {
+            day = date.getDate();
+            daysHtml += '<td>' + day + '</td>';
+            date.setDate(day + 1);
         }
+        daysHtml += '</tr>';
     }
+    calendarBody.innerHTML = daysHtml;
 };

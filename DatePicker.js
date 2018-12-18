@@ -1,5 +1,8 @@
 'use strict';
 
+/**
+ * Attach a DatePicker to element with given id.
+ */
 var DatePicker = function DatePicker(id, callback) {
     this.id = id;
     this.callback = callback;
@@ -60,7 +63,9 @@ DatePicker.prototype.render = function render(date) {
         tempDay = tempDate.getDate(),
         calendarBody,
         daysHtml = '',
-        i;
+        i,
+        selectables,
+        node;
 
     this.callback(this.id, { month: month, day: day, year: year });
 
@@ -90,10 +95,25 @@ DatePicker.prototype.render = function render(date) {
         daysHtml += '<tr>';
         for (i = 0; i < 7; i += 1) {
             tempDay = tempDate.getDate();
-            daysHtml += '<td>' + tempDay + '</td>';
+            if (tempDate.getMonth() % 12 !== monthIndex % 12) {
+                daysHtml += '<td class="dimmed">' + tempDay + '</td>';
+            } else if (tempDay === day) {
+                daysHtml += '<td class="active">' + tempDay + '</td>';
+            } else {
+                daysHtml += '<td class="selectable-day">' + tempDay + '</td>';
+            }
             tempDate.setDate(tempDay + 1);
         }
         daysHtml += '</tr>';
     }
     calendarBody.innerHTML = daysHtml;
+
+    // Implement selectable days
+    selectables = document.querySelectorAll('#' + this.id + ' .selectable-day');
+    for (i = 0; i < selectables.length; i += 1) {
+        selectables[i].addEventListener('click', function (event) {
+            var day = event.target.textContent;
+            that.render(new Date(year, monthIndex, day));
+        });
+    }
 };

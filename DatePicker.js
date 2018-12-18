@@ -2,10 +2,7 @@
 
 var DatePicker = function DatePicker(id, callback) {
     this.id = id;
-
-    var date = { month: 0, day: 0, year: 0 };
-
-    callback(id, date);
+    this.callback = callback;
 };
 
 /**
@@ -23,13 +20,15 @@ DatePicker.prototype.monthName = function monthName(monthIndex) {
 /**
  * Create and render table in the DOM.
  */
-DatePicker.prototype.renderTable = function renderTable(monthName) {
+DatePicker.prototype.renderTable = function renderTable(monthName, year) {
 
     document.getElementById(this.id).innerHTML = [
         '<table>',
         '<thead>',
         '<tr>',
-        '<th colspan="7">', monthName, '</th>',
+        '<th class="month-back">&lt;</th>',
+        '<th colspan="5">', monthName.slice(0,3), ' ', year, '</th>',
+        '<th class="month-forward">&gt;</th>',
         '</tr>',
         '<tr>',
         '<th>S</th>',
@@ -52,29 +51,47 @@ DatePicker.prototype.renderTable = function renderTable(monthName) {
  * Render DatePicker in the DOM.
  */
 DatePicker.prototype.render = function render(date) {
-    var day = date.getDate(),
-        month = date.getMonth(),
+    var month = date.getMonth() + 1,
+        day = date.getDate(),
+        year = date.getFullYear(),
+        monthIndex = date.getMonth(),
+        that = this,
+        tempDate = new Date(year, monthIndex, day),
+        tempDay = tempDate.getDate(),
         calendarBody,
         daysHtml = '',
         i;
 
-    this.renderTable(this.monthName(month));
+    this.callback(this.id, { month: month, day: day, year: year });
 
-    date.setDate(1);  // Change to first day of the month
-    if (date.getDay() !== 0) {
+    this.renderTable(this.monthName(monthIndex), year);
+
+    // Implement back and forward buttons
+    document.querySelector('#' + this.id + ' .month-back')
+            .addEventListener('click', function (event) {
+                that.render(new Date(year, monthIndex - 1));
+            });
+    document.querySelector('#' + this.id + ' .month-forward')
+            .addEventListener('click', function (event) {
+                that.render(new Date(year, monthIndex + 1));
+            });
+
+
+    tempDate.setDate(1);  // Change to first day of the month
+    if (tempDate.getDay() !== 0) {
         // If the day of week is not a Sunday...
         // ...go backwards in time until we hit a Sunday
-        date.setDate(1 - date.getDay());
+        tempDate.setDate(1 - tempDate.getDay());
     }
 
     // Fill calendar body with days
     calendarBody = document.querySelector('#' + this.id + ' tbody');
-    while (date.getMonth() % 12 !== (month + 1) % 12) {
+    while (tempDate.getMonth() % 12 !== (monthIndex + 1) % 12) {
         daysHtml += '<tr>';
         for (i = 0; i < 7; i += 1) {
-            day = date.getDate();
-            daysHtml += '<td>' + day + '</td>';
-            date.setDate(day + 1);
+            tempDay = tempDate.getDate();
+            daysHtml += '<td>' + tempDay + '</td>';
+            tempDate.setDate(tempDay + 1);
         }
         daysHtml += '</tr>';
     }

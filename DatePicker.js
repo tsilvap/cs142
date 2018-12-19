@@ -30,7 +30,7 @@ DatePicker.prototype.renderTable = function renderTable(monthName, year) {
         '<thead>',
         '<tr>',
         '<th class="month-back">&lt;</th>',
-        '<th colspan="5">', monthName.slice(0,3), ' ', year, '</th>',
+        '<th colspan="5">', monthName.slice(0, 3), ' ', year, '</th>',
         '<th class="month-forward">&gt;</th>',
         '</tr>',
         '<tr>',
@@ -65,7 +65,7 @@ DatePicker.prototype.render = function render(date) {
         daysHtml = '',
         i,
         selectables,
-        node;
+        selectableHandler;
 
     this.callback(this.id, { month: month, day: day, year: year });
 
@@ -73,16 +73,16 @@ DatePicker.prototype.render = function render(date) {
 
     // Implement back and forward buttons
     document.querySelector('#' + this.id + ' .month-back')
-            .addEventListener('click', function (event) {
-                that.render(new Date(year, monthIndex - 1));
-            });
+        .addEventListener('click', function () {
+            that.render(new Date(year, monthIndex - 1));
+        });
     document.querySelector('#' + this.id + ' .month-forward')
-            .addEventListener('click', function (event) {
-                that.render(new Date(year, monthIndex + 1));
-            });
+        .addEventListener('click', function () {
+            that.render(new Date(year, monthIndex + 1));
+        });
 
-
-    tempDate.setDate(1);  // Change to first day of the month
+    // Change to first day of the month
+    tempDate.setDate(1);
     if (tempDate.getDay() !== 0) {
         // If the day of week is not a Sunday...
         // ...go backwards in time until we hit a Sunday
@@ -110,10 +110,14 @@ DatePicker.prototype.render = function render(date) {
 
     // Implement selectable days
     selectables = document.querySelectorAll('#' + this.id + ' .selectable-day');
+    selectableHandler = function selectableHandler(event) {
+        that.render(new Date(
+            year,
+            monthIndex,
+            event.target.textContent  // day
+        ));
+    };
     for (i = 0; i < selectables.length; i += 1) {
-        selectables[i].addEventListener('click', function (event) {
-            var day = event.target.textContent;
-            that.render(new Date(year, monthIndex, day));
-        });
+        selectables[i].addEventListener('click', selectableHandler);
     }
 };
